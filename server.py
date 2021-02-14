@@ -14,9 +14,10 @@ import traceback
 if not os.getenv("DATABASE_URL"):
     raise RuntimeError("DATABASE_URL is not set")
 
-# cors = CORS(server)
-# app.config['CORS_HEADERS'] = 'Content-Type'
 app = Flask(__name__)
+cors = CORS(app)
+app.config['CORS_HEADERS'] = 'Content-Type'
+
 engine = create_engine(os.getenv("DATABASE_URL"))
 db = scoped_session(sessionmaker(bind=engine))
 @app.route("/")
