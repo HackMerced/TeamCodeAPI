@@ -5,7 +5,7 @@ Backend server for teamcodes
 - **/addteam**:
     - Methods: Post
     - input: team_code, user_id
-    -output: error: error message/success
+    - output: error: error message/success
 - **/jointeam**:
     - Methods: Post
     - input: team_code, user_id
