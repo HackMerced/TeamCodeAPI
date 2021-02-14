@@ -29,7 +29,7 @@ def index():
 def addTeam():
     addTeam_params = request.get_json()
     team_code = str(addTeam_params["team_code"])
-    owner_id = str(addteam_params["user_id"])
+    owner_id = str(addTeam_params["user_id"])
     print(team_code)
     if(db.execute("SELECT COUNT(team_code) FROM teams WHERE upper(team_code) =:team_code", {"team_code":team_code.upper()}).fetchone()[0] == 0):
         print(db.execute("SELECT COUNT(team_code) FROM teams").fetchone()[0])
