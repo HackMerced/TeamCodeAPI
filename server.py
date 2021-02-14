@@ -28,10 +28,11 @@ def index():
 def addTeam():
     addTeam_params = request.get_json()
     team_code = str(addTeam_params["team_code"])
+    owner_id = str(addteam_params["user_id"])
     print(team_code)
-    if(db.execute("SELECT COUNT(team_name) FROM teams WHERE upper(team_code) =:team_code", {"team_code":team_code.upper()}).fetchone()[0] == 0):
+    if(db.execute("SELECT COUNT(team_code) FROM teams WHERE upper(team_code) =:team_code", {"team_code":team_code.upper()}).fetchone()[0] == 0):
         print(db.execute("SELECT COUNT(team_code) FROM teams").fetchone()[0])
-        db.execute("INSERT INTO teams (team_code) VALUES(:team_code)",{"team_code":team_code})
+        db.execute("INSERT INTO teams (team_code,owner) VALUES(:team_code,:owner)",{"team_code":team_code.upper(),"owner":owner_id})
         db.commit()
         return jsonify({"error":"success"}),200
     else:
@@ -42,5 +43,17 @@ def addTeam():
 def joinTeam():
     joinTeam_params = request.get_json()
     team_code = str(joinTeam_params["team_code"])
+    user_id = str(joinTeam_params["user_id"])
+    # Check if team exists:
+    if(db.execute("SELECT COUNT(team_code) FROM teams WHERE upper(team_code) =:team_code", {"team_code":team_code.upper()}).fetchone()[0] == 0):
+        return jsonify({"error":"team doesnt exist"}),200
+    else:
+        # check if user is already in a team:
+        if(db.execute("SELECT COUNT(team_code) FROM teams WHERE upper(owner)=:user_id",{"user_id":user_id)}).fetchone()[0] != 0 or db.execute("SELECT COUNT(team_code) FROM teams WHERE :user_id = ANY (member_list)",{"user_id":user_id.upper()}).fetchone()[0] != 0):
+            return jsonify({"error":"user already in team"}),200
+        # join team:
+        db.execute("UPDATE teams SET member_list = array_append(member_list, :user_id) WHERE upper(team_code)=:team_code",{"user_id":user_id, "team_code":team_code.upper()})
+        db.commit()
+        return jsonify({"error":"joined team"}),200
 
     
