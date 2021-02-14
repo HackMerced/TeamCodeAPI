@@ -27,13 +27,20 @@ def index():
 @app.route("/addTeam", methods = ["POST"])
 def addTeam():
     addTeam_params = request.get_json()
-    team_name = str(addTeam_params["team_name"])
-    print(team_name)
-    if(db.execute("SELECT COUNT(team_name) FROM teams WHERE upper(team_name) =:team_name", {"team_name":team_name.upper()}).fetchone()[0] == 0):
-        print(db.execute("SELECT COUNT(team_name) FROM teams").fetchone()[0])
-        db.execute("INSERT INTO teams (team_name) VALUES(:team_name)",{"team_name":team_name})
+    team_code = str(addTeam_params["team_code"])
+    print(team_code)
+    if(db.execute("SELECT COUNT(team_name) FROM teams WHERE upper(team_code) =:team_code", {"team_code":team_code.upper()}).fetchone()[0] == 0):
+        print(db.execute("SELECT COUNT(team_code) FROM teams").fetchone()[0])
+        db.execute("INSERT INTO teams (team_code) VALUES(:team_code)",{"team_code":team_code})
         db.commit()
         return jsonify({"error":"success"}),200
     else:
         return jsonify({"error":"team already exists"}),200
 
+# Join team endpoint
+@app.route("/joinTeam", methods = ["POST"])
+def joinTeam():
+    joinTeam_params = request.get_json()
+    team_code = str(joinTeam_params["team_code"])
+
+    
