@@ -49,11 +49,23 @@ def joinTeam():
         return jsonify({"error":"team doesnt exist"}),200
     else:
         # check if user is already in a team:
-        if(db.execute("SELECT COUNT(team_code) FROM teams WHERE upper(owner)=:user_id",{"user_id":user_id)}).fetchone()[0] != 0 or db.execute("SELECT COUNT(team_code) FROM teams WHERE :user_id = ANY (member_list)",{"user_id":user_id.upper()}).fetchone()[0] != 0):
+        if(db.execute("SELECT COUNT(team_code) FROM teams WHERE upper(owner)=:user_id",{"user_id":user_id}).fetchone()[0] != 0 or db.execute("SELECT COUNT(team_code) FROM teams WHERE :user_id = ANY (member_list)",{"user_id":user_id.upper()}).fetchone()[0] != 0):
             return jsonify({"error":"user already in team"}),200
         # join team:
         db.execute("UPDATE teams SET member_list = array_append(member_list, :user_id) WHERE upper(team_code)=:team_code",{"user_id":user_id, "team_code":team_code.upper()})
         db.commit()
         return jsonify({"error":"joined team"}),200
 
-    
+@app.route("/getTeamInfo/<string:team_code>")
+def getTeamInfo(team_code):
+    # check if team exists:
+    owner = ""
+    members = []
+    if(db.execute("SELECT COUNT(team_code) FROM teams WHERE upper(team_code)=:team_code", {"team_code":team_code.upper()}).fetchone()[0] == 0):
+        return jsonify({"error":"team doesnt exist"}),200
+    else:
+        owner = str(db.execute("SELECT owner FROM teams WHERE upper(team_code)=:team_code",{"team_code":team_code.upper()}).fetchone()[0])
+        members = db.execute("SELECT member_list FROM teams WHERE upper(team_code)=:team_code",{"team_code":team_code.upper()}).fetchone()[0]
+        return jsonify({"error":"success",
+                        "owner":owner,
+                        "members":members}),200
